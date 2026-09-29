@@ -33,7 +33,10 @@ def main():
         # Resolver
         # -----------------------------------------
 
-        resultado = resolver(tabla)
+        resultado = resolver(
+            tabla,
+            mostrar_iteracion
+        )
 
         # -----------------------------------------
         # Mostrar resultado
