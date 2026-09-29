@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="es">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Lecturas del sensor</title>
+	<link rel="stylesheet" href="Sensor.css">
+</head>
+<body>
+	<h1>Lecturas del sensor</h1>
+	<span id="Temperatura">Cargando...</span>
+	<span id="Humedad">Cargando...</span>
+	<button id="mostrarHistorial" type="button">Mostrar historial de temperaturas</button>
+	<section id="historial" hidden>
+		<h2>Historial de temperaturas</h2>
+		<label for="periodoHistorial">Periodo:</label>
+		<select id="periodoHistorial">
+			<option value="24">Últimas 24 horas</option>
+			<option value="48">Últimas 48 horas</option>
+			<option value="168">Última semana</option>
+			<option value="mes">Último mes</option>
+			<option value="año">Último año</option>
+		</select>
+		<div class="contenedorGrafica">
+			<canvas id="graficaTemperaturas" aria-label="Gráfica del historial de temperaturas"></canvas>
+		</div>
+		<table>
+			<thead>
+				<tr>
+					<th>Fecha</th>
+					<th>Temperatura</th>
+				</tr>
+			</thead>
+			<tbody id="listaHistorial"></tbody>
+		</table>
+	</section>
+
+	<script src="https://cdn.jsdelivr.net/npm/particle-api-js@10/dist/particle.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+	<script src="Sensor.js"></script>
+</body>
+</html>
