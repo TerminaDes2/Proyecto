@@ -1,10 +1,4 @@
-from math import isclose
-
-
-EPSILON = 1e-9
-
-
-def resolver(tabla):
+def resolver(tabla, mostrar_iteracion):
 
     iteracion = 0
 
@@ -51,6 +45,11 @@ def resolver(tabla):
         )
 
         iteracion += 1
+
+        mostrar_iteracion(
+            tabla,
+            iteracion
+        )
 
 
 def buscar_columna_pivote(tabla):
@@ -101,7 +100,7 @@ def buscar_fila_pivote(
         )
 
         # Solo valores positivos
-        if elemento > EPSILON:
+        if elemento > 0:
 
             razon = rhs / elemento
 
@@ -158,9 +157,6 @@ def pivotear(
                 * matriz[fila_pivote][columna]
             )
 
-    limpiar_decimales(tabla)
-
-
 def actualizar_base(
     tabla,
     fila_pivote,
@@ -170,18 +166,3 @@ def actualizar_base(
     tabla.base[fila_pivote] = (
         tabla.columnas[columna_pivote]
     )
-
-
-def limpiar_decimales(tabla):
-
-    for fila in tabla.matriz:
-
-        for columna in range(len(fila)):
-
-            if isclose(
-                fila[columna],
-                0,
-                abs_tol=EPSILON
-            ):
-
-                fila[columna] = 0.0
