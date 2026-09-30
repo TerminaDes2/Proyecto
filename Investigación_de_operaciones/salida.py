@@ -3,177 +3,83 @@ def mostrar_tabla(tabla):
     print("\n" + "=" * 60)
     print("TABLA SIMPLEX")
     print("=" * 60)
-
-    # Encabezado
-    print(
-        f"{'Base':>8}",
-        end=""
-    )
-
+    print(f"{'Base':>8}", end="")
     for columna in tabla.columnas:
-
-        print(
-            f"{columna:>10}",
-            end=""
-        )
-
+        print(f"{columna:>10}", end="")
     print()
 
-    # Filas de restricciones
-    for i, fila in enumerate(
-        tabla.matriz[:-1]
-    ):
-
-        print(
-            f"{tabla.base[i]:>8}",
-            end=""
-        )
-
+    for indice, fila in enumerate(tabla.matriz[:-1]):
+        print(f"{tabla.base[indice]:>8}", end="")
         for valor in fila:
-
-            print(
-                f"{valor:10.2f}",
-                end=""
-            )
-
+            print(f"{valor:10.2f}", end="")
         print()
 
-    # Z
-    print(
-        f"{'Z':>8}",
-        end=""
-    )
-
+    print(f"{'Z':>8}", end="")
     for valor in tabla.matriz[-1]:
-
-        print(
-            f"{valor:10.2f}",
-            end=""
-        )
-
+        print(f"{valor:10.2f}", end="")
     print()
 
 
-def mostrar_iteracion(
-    tabla,
-    numero
-):
+def mostrar_traza(traza):
 
-    print(
-        f"\n===== ITERACIÓN {numero} ====="
-    )
+    print("\n===== DETALLE DE ITERACIONES =====")
+    if not traza:
+        print("No se necesitaron pivoteos.")
+        return
 
-    mostrar_tabla(tabla)
+    for numero, paso in enumerate(traza, 1):
+        razones = ", ".join(
+            f"{base}: {valor:.4f}" for base, valor in paso["divisiones"]
+        ) or "ninguna"
+        print(
+            f"Iteración {numero} (fase {paso['fase']}): "
+            f"columna pivote = {paso['columna']}; "
+            f"divisiones = {razones}; "
+            f"elemento pivote = {paso['elemento']}"
+        )
 
 
-def obtener_solucion(
-    tabla,
-    cantidad_variables
-):
+def obtener_solucion(tabla, cantidad_variables):
 
     valores = [0.0] * cantidad_variables
-
-    cantidad_restricciones = len(
-        tabla.matriz
-    ) - 1
-
-    for variable in range(
-        cantidad_variables
-    ):
-
-        nombre = (
-            f"X{variable + 1}"
-        )
-
-        if nombre not in tabla.columnas:
-            continue
-
-        columna = tabla.columnas.index(
-            nombre
-        )
-
-        fila_basica = -1
-
-        es_basica = True
-
-        for fila in range(
-            cantidad_restricciones
-        ):
-
-            valor = (
-                tabla.matriz[fila][columna]
-            )
-
-            if abs(valor - 1) < 1e-9:
-
-                if fila_basica == -1:
-                    fila_basica = fila
-
-                else:
-                    es_basica = False
-
-            elif abs(valor) > 1e-9:
-
-                es_basica = False
-
-        if (
-            es_basica
-            and fila_basica != -1
-        ):
-
-            valores[variable] = (
-                tabla.matriz[fila_basica][-1]
-            )
-
+    cantidad_restricciones = len(tabla.matriz) - 1
+    for variable, transformacion in enumerate(tabla.transformaciones_nombres):
+        for nombre, signo in transformacion:
+            if nombre not in tabla.columnas:
+                continue
+            columna = tabla.columnas.index(nombre)
+            for fila in range(cantidad_restricciones):
+                if (abs(tabla.matriz[fila][columna] - 1) < 1e-9 and
+                        all(fila == otra or abs(tabla.matriz[otra][columna]) < 1e-9
+                            for otra in range(cantidad_restricciones))):
+                    valores[variable] += signo * tabla.matriz[fila][-1]
+                    break
     z = tabla.matriz[-1][-1]
-
+    if tabla.tipo_objetivo == "min":
+        z = -z
     return valores, z
 
 
-def mostrar_resultado(
-    resultado,
-    cantidad_variables
-):
+def mostrar_resultado(resultado, cantidad_variables, problema):
 
     print("\n" + "=" * 60)
     print("RESULTADO")
     print("=" * 60)
-
     estado = resultado["estado"]
 
+    if estado == "sin_solucion":
+        print("El problema no tiene solución factible (no existe BF).")
+        return
     if estado == "no_acotado":
-
-        print(
-            "El problema no tiene una solución "
-            "óptima acotada."
-        )
-
+        print("El problema es no acotado; no tiene solución óptima finita.")
         return
-
     if estado != "optimo":
-
-        print("No se pudo obtener una solución.")
-
+        print(f"No se pudo obtener una solución: {estado}.")
         return
 
-    valores, z = obtener_solucion(
-        resultado["tabla"],
-        cantidad_variables
-    )
-
-    print("\nSolución óptima:")
-
-    for i, valor in enumerate(valores):
-
-        print(
-            f"X{i + 1} = {valor:.4f}"
-        )
-
-    print(
-        f"\nZ = {z:.4f}"
-    )
-
-    print(
-        f"Iteraciones: "
-        f"{resultado['iteraciones']}"
-    )
+    valores, z = obtener_solucion(resultado["tabla"], cantidad_variables)
+    print("\nSolución óptima / solución BF:")
+    for indice, valor in enumerate(valores):
+        print(f"X{indice + 1} = {valor:.4f}")
+    print(f"\nZ = {z:.4f}")
+    print(f"Iteraciones: {resultado['iteraciones']}")

@@ -1,9 +1,8 @@
 from entrada import leer_problema
-from tabla import preparar_simplex
-from simplex import resolver
+from metodos import resolver_problema
 from salida import (
     mostrar_tabla,
-    mostrar_iteracion,
+    mostrar_traza,
     mostrar_resultado
 )
 
@@ -17,23 +16,11 @@ def main():
         if problema is None:
             return
 
-        # -----------------------------------------
-        # Preparar problema
-        # -----------------------------------------
+        resultado = resolver_problema(problema)
 
-        tabla = preparar_simplex(
-            problema
-        )
-
-        print("\n===== TABLA INICIAL =====")
-
-        mostrar_tabla(tabla)
-
-        # -----------------------------------------
-        # Resolver
-        # -----------------------------------------
-
-        resultado = resolver(tabla)
+        print("\n===== TABLA FINAL =====")
+        mostrar_tabla(resultado["tabla"])
+        mostrar_traza(resultado["traza"])
 
         # -----------------------------------------
         # Mostrar resultado
@@ -41,7 +28,8 @@ def main():
 
         mostrar_resultado(
             resultado,
-            len(problema.objetivo)
+            len(problema.objetivo),
+            problema
         )
 
     except ValueError as error:

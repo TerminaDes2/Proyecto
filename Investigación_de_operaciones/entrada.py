@@ -22,6 +22,9 @@ def leer_problema():
         print("Opción no válida.")
         return None
 
+    no_negativas = leer_no_negatividad()
+    metodo = leer_metodo()
+
     cantidad_variables = int(
         input("\nIngrese la cantidad de variables: ")
     )
@@ -40,8 +43,45 @@ def leer_problema():
     return Problema(
         objetivo,
         restricciones,
-        tipo
+        tipo,
+        no_negativas,
+        metodo
     )
+
+
+def leer_no_negatividad():
+
+    opcion = input(
+        "\n¿Se usarán variables de no negatividad?\n"
+        "1. Sí (Xj >= 0)\n"
+        "2. No (variables libres)\n"
+        "Opción: "
+    )
+
+    if opcion == "1":
+        return True
+    if opcion == "2":
+        return False
+    raise ValueError("La opción de no negatividad debe ser 1 o 2.")
+
+
+def leer_metodo():
+
+    opcion = input(
+        "\nSeleccione el método:\n"
+        "1. Simplex\n"
+        "2. Dos fases\n"
+        "3. Gran M\n"
+        "Opción: "
+    )
+
+    if opcion == "1":
+        return "simplex"
+    if opcion == "2":
+        return "dos_fases"
+    if opcion == "3":
+        return "gran_m"
+    raise ValueError("El método debe ser 1, 2 o 3.")
 
 
 def leer_funcion_objetivo(cantidad_variables):

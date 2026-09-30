@@ -1,0 +1,59 @@
+Metodo simplex
+Maximizar:
+Z = x1 + 2x2
+
+x1 + 3x2 <= 18
+x1 + x2 <= 8
+2x1 + x2 <= 14
+x1, x2 >= 0
+
+Solución óptima / solución BF:
+X1 = 3.0000
+X2 = 5.0000
+
+Z = 13.0000
+Iteraciones: 2
+
+
+Metodo de las dos fases
+Minimizar:
+z= 0.4x1 + 0.5x2 
+0.3x1 + 0.1x2 <= 2.7 
+0.5x1 + 0.5x2 = 6 
+0.6x1 + 0.4x2 >= 6
+
+Solución óptima / solución BF:
+X1 = 7.5000
+X2 = 4.5000
+
+Z = 5.2500
+Iteraciones: 3
+
+
+
+Metodo de la M
+Maximizar:
+Z = 5x1 + 4x2
+
+6x1 +4x2 <= 24
+x1 + 2x2 <= 6
+-x1 + 2x2 <= 1
+x1, x2 >= 0
+
+Solución óptima / solución BF:
+X1 = 3.0000
+X2 = 1.5000
+
+Z = 21.0000
+Iteraciones: 2
+
+
+Ejemplo sin solución factible
+Minimizar:
+z = 3x1 + 2x2
+sujeto a:
+
+x1 +x2 >= 4
+2x1 + x2 = 5
+x1 + 2x2 <= 6
+x1, x2 >= 0

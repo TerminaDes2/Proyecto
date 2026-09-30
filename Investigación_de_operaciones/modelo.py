@@ -8,10 +8,12 @@ class Restriccion:
 
 class Problema:
 
-    def __init__(self, objetivo, restricciones, tipo="max"):
+    def __init__(self, objetivo, restricciones, tipo="max", no_negativas=True, metodo="dos_fases"):
         self.objetivo = objetivo
         self.restricciones = restricciones
         self.tipo = tipo
+        self.no_negativas = no_negativas
+        self.metodo = metodo
 
 
 class TablaSimplex:
