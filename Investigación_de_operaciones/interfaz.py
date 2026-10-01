@@ -20,9 +20,9 @@ class InterfazSimplex:
     def __init__(self, ventana):
         self.ventana = ventana
         self.ventana.title("Métodos de programación lineal")
-        self.ventana.geometry("1160x820")
-        self.ventana.minsize(960, 650)
-        self.ventana.configure(bg="#f4f7fb")
+        self.ventana.geometry("1280x850")
+        self.ventana.minsize(1000, 700)
+        self.ventana.configure(bg="#f2f5f1")
         self._configurar_estilos()
 
         self.tipo = tk.StringVar(value="max")
@@ -36,8 +36,8 @@ class InterfazSimplex:
         self.rhs_restricciones = []
 
         self._crear_encabezado()
-        self._crear_controles()
         self._crear_formulario()
+        self._crear_controles()
         self._crear_salida()
         self._actualizar_formulario()
 
@@ -45,38 +45,66 @@ class InterfazSimplex:
         estilos = ttk.Style(self.ventana)
         estilos.theme_use("clam")
         estilos.configure(".", font=("Segoe UI", 10))
-        estilos.configure("App.TFrame", background="#f4f7fb")
+        estilos.configure("App.TFrame", background="#f2f5f1")
+        estilos.configure("Header.TFrame", background="#173b35")
         estilos.configure(
             "Card.TLabelframe",
             background="#ffffff",
-            bordercolor="#dbe3ef",
+            bordercolor="#d5ded7",
             relief="solid",
             borderwidth=1,
         )
         estilos.configure(
             "Card.TLabelframe.Label",
             background="#ffffff",
-            foreground="#233044",
+            foreground="#24443d",
             font=("Segoe UI Semibold", 10),
         )
         estilos.configure(
-            "TLabel", background="#ffffff", foreground="#334155"
+            "TLabel", background="#ffffff", foreground="#34443e"
         )
         estilos.configure(
             "Title.TLabel",
-            background="#f4f7fb",
-            foreground="#172033",
+            background="#173b35",
+            foreground="#ffffff",
             font=("Segoe UI Semibold", 22),
         )
         estilos.configure(
             "Subtitle.TLabel",
-            background="#f4f7fb",
-            foreground="#64748b",
+            background="#173b35",
+            foreground="#c5d7ce",
             font=("Segoe UI", 10),
         )
         estilos.configure(
+            "Section.TLabel",
+            background="#ffffff",
+            foreground="#63736b",
+            font=("Segoe UI Semibold", 9),
+        )
+        estilos.configure(
+            "TNotebook", background="#ffffff", borderwidth=0
+        )
+        estilos.configure(
+            "TNotebook.Tab", padding=(14, 8), font=("Segoe UI Semibold", 9)
+        )
+        estilos.configure(
+            "Treeview",
+            background="#ffffff",
+            fieldbackground="#ffffff",
+            foreground="#263a33",
+            rowheight=27,
+            borderwidth=0,
+        )
+        estilos.configure(
+            "Treeview.Heading",
+            background="#e8eee9",
+            foreground="#24443d",
+            font=("Segoe UI Semibold", 9),
+            padding=7,
+        )
+        estilos.configure(
             "Accent.TButton",
-            background="#2563eb",
+            background="#b94732",
             foreground="#ffffff",
             borderwidth=0,
             padding=(16, 8),
@@ -84,68 +112,74 @@ class InterfazSimplex:
         )
         estilos.map(
             "Accent.TButton",
-            background=[("active", "#1d4ed8"), ("pressed", "#1e40af")],
+            background=[("active", "#a13c2a"), ("pressed", "#873321")],
         )
         estilos.configure(
             "Secondary.TButton",
-            background="#e8eef7",
-            foreground="#29415f",
+            background="#e6ece7",
+            foreground="#29443b",
             borderwidth=0,
             padding=(12, 8),
         )
         estilos.map(
             "Secondary.TButton",
-            background=[("active", "#dbe6f4"), ("pressed", "#cbd8e8")],
+            background=[("active", "#d4dfd6"), ("pressed", "#c5d3c8")],
         )
         estilos.configure(
             "TEntry",
             fieldbackground="#fbfdff",
-            bordercolor="#cbd5e1",
+            bordercolor="#cbd8d0",
             padding=5,
         )
         estilos.configure(
             "TCombobox",
-            fieldbackground="#fbfdff",
-            bordercolor="#cbd5e1",
+            fieldbackground="#ffffff",
+            bordercolor="#cbd8d0",
             padding=4,
         )
 
     def _crear_encabezado(self):
-        encabezado = ttk.Frame(self.ventana, style="App.TFrame")
-        encabezado.pack(fill="x", padx=24, pady=(22, 10))
+        encabezado = ttk.Frame(self.ventana, style="Header.TFrame")
+        encabezado.pack(fill="x", padx=20, pady=(18, 12))
         ttk.Label(
             encabezado,
             text="Programación lineal",
             style="Title.TLabel",
-        ).pack(anchor="w")
+        ).pack(anchor="w", padx=20, pady=(14, 0))
         ttk.Label(
             encabezado,
             text="Resuelve problemas con Simplex, Dos fases o Gran M",
             style="Subtitle.TLabel",
-        ).pack(anchor="w", pady=(2, 0))
+        ).pack(anchor="w", padx=20, pady=(2, 14))
 
     def _crear_controles(self):
         controles = ttk.LabelFrame(
-            self.ventana, text="  Configuración del problema  ",
+            self.panel_entrada, text="  Configuración  ",
             style="Card.TLabelframe",
         )
-        controles.pack(fill="x", padx=24, pady=8, ipady=5)
+        controles.grid(row=0, column=0, sticky="ew", pady=(0, 10), ipady=5)
+        for columna in range(4):
+            controles.columnconfigure(columna, weight=1)
 
-        ttk.Label(controles, text="Tipo:").grid(row=0, column=0, padx=5, pady=5)
+        ttk.Label(controles, text="OBJETIVO", style="Section.TLabel").grid(
+            row=0, column=0, columnspan=4, padx=12, pady=(8, 2), sticky="w"
+        )
         ttk.Radiobutton(
             controles, text="Maximización", variable=self.tipo, value="max"
-        ).grid(row=0, column=1, sticky="w")
+        ).grid(row=1, column=0, columnspan=2, padx=12, pady=(0, 4), sticky="w")
         ttk.Radiobutton(
             controles, text="Minimización", variable=self.tipo, value="min"
-        ).grid(row=0, column=2, sticky="w")
+        ).grid(row=1, column=2, columnspan=2, padx=4, pady=(0, 4), sticky="w")
 
         ttk.Checkbutton(
             controles,
             text="Variables no negativas (Xj >= 0)",
             variable=self.no_negativas,
-        ).grid(row=0, column=3, padx=12, sticky="w")
+        ).grid(row=2, column=0, columnspan=4, padx=12, pady=(0, 8), sticky="w")
 
-        ttk.Label(controles, text="Método:").grid(row=1, column=0, padx=5, pady=5)
+        ttk.Label(controles, text="MÉTODO", style="Section.TLabel").grid(
+            row=3, column=0, columnspan=4, padx=12, pady=(0, 2), sticky="w"
+        )
         metodos = ttk.Combobox(
             controles,
             textvariable=self.metodo,
@@ -153,9 +187,14 @@ class InterfazSimplex:
             state="readonly",
             width=16,
         )
-        metodos.grid(row=1, column=1, sticky="w")
+        metodos.grid(row=4, column=0, columnspan=4, padx=12, pady=(0, 8), sticky="ew")
 
-        ttk.Label(controles, text="Variables:").grid(row=1, column=2, padx=5)
+        ttk.Label(controles, text="DIMENSIONES", style="Section.TLabel").grid(
+            row=5, column=0, columnspan=4, padx=12, pady=(0, 2), sticky="w"
+        )
+        ttk.Label(controles, text="Variables").grid(
+            row=6, column=0, padx=(12, 4), pady=(0, 8), sticky="w"
+        )
         ttk.Spinbox(
             controles,
             from_=1,
@@ -163,9 +202,10 @@ class InterfazSimplex:
             textvariable=self.cantidad_variables,
             width=5,
             command=self._actualizar_formulario,
-        ).grid(row=1, column=3, sticky="w")
-
-        ttk.Label(controles, text="Restricciones:").grid(row=1, column=4, padx=5)
+        ).grid(row=6, column=1, padx=(0, 6), pady=(0, 8), sticky="w")
+        ttk.Label(controles, text="Restricciones").grid(
+            row=6, column=2, padx=(4, 2), pady=(0, 8), sticky="w"
+        )
         ttk.Spinbox(
             controles,
             from_=1,
@@ -173,52 +213,113 @@ class InterfazSimplex:
             textvariable=self.cantidad_restricciones,
             width=5,
             command=self._actualizar_formulario,
-        ).grid(row=1, column=5, sticky="w")
+        ).grid(row=6, column=3, padx=(0, 12), pady=(0, 8), sticky="w")
 
         ttk.Button(
             controles, text="Actualizar formulario",
             command=self._actualizar_formulario,
             style="Secondary.TButton",
-        ).grid(row=1, column=6, padx=10)
+        ).grid(row=7, column=0, columnspan=4, padx=12, pady=(0, 6), sticky="ew")
         ttk.Button(
-            controles, text="▶  Resolver",
+            controles, text="Resolver",
             command=self._resolver,
             style="Accent.TButton",
-        ).grid(row=1, column=7, padx=(5, 12))
+        ).grid(row=8, column=0, columnspan=2, padx=(12, 4), pady=(0, 8), sticky="ew")
         ttk.Button(
-            controles, text="▱  Graficar",
+            controles, text="Graficar",
             command=self._graficar,
             style="Secondary.TButton",
-        ).grid(row=1, column=8, padx=(0, 12))
+        ).grid(row=8, column=2, columnspan=2, padx=(4, 12), pady=(0, 8), sticky="ew")
 
     def _crear_formulario(self):
-        self.formulario = ttk.Frame(self.ventana, style="App.TFrame")
-        self.formulario.pack(fill="both", expand=False, padx=24)
+        self.contenido = ttk.Panedwindow(self.ventana, orient="horizontal")
+        self.contenido.pack(fill="both", expand=True, padx=20, pady=(0, 18))
+        self.formulario = ttk.Frame(self.contenido, style="App.TFrame")
+        self.contenido.add(self.formulario, weight=1)
+        self.panel_entrada = ttk.Frame(self.formulario, style="App.TFrame")
+        self.panel_entrada.grid(row=0, column=0, sticky="nsew")
+        self.formulario.rowconfigure(0, weight=1)
+        self.formulario.columnconfigure(0, weight=1)
+        self.panel_entrada.rowconfigure(1, weight=1)
+        self.panel_entrada.columnconfigure(0, weight=1)
+
+        self.formulario_canvas = tk.Canvas(
+            self.panel_entrada, bg="#f2f5f1", highlightthickness=0
+        )
+        barra_vertical = ttk.Scrollbar(
+            self.panel_entrada, orient="vertical", command=self.formulario_canvas.yview
+        )
+        barra_horizontal = ttk.Scrollbar(
+            self.panel_entrada, orient="horizontal", command=self.formulario_canvas.xview
+        )
+        self.formulario_canvas.configure(
+            yscrollcommand=barra_vertical.set,
+            xscrollcommand=barra_horizontal.set,
+        )
+        self.formulario_canvas.grid(row=1, column=0, sticky="nsew")
+        barra_vertical.grid(row=1, column=1, sticky="ns")
+        barra_horizontal.grid(row=2, column=0, sticky="ew")
+        self.formulario_interior = ttk.Frame(
+            self.formulario_canvas, style="App.TFrame"
+        )
+        self.formulario_id = self.formulario_canvas.create_window(
+            (0, 0), window=self.formulario_interior, anchor="nw"
+        )
+        self.formulario_interior.bind(
+            "<Configure>",
+            lambda _evento: self.formulario_canvas.configure(
+                scrollregion=self.formulario_canvas.bbox("all")
+            ),
+        )
+        self.formulario_canvas.bind("<Configure>", self._ajustar_formulario)
 
         self.objetivo_frame = ttk.LabelFrame(
-            self.formulario, text="  Función objetivo  ",
+            self.formulario_interior, text="  Función objetivo  ",
             style="Card.TLabelframe",
         )
         self.objetivo_frame.pack(fill="x", pady=5, ipady=4)
 
         self.restricciones_frame = ttk.LabelFrame(
-            self.formulario, text="  Restricciones  ",
+            self.formulario_interior, text="  Restricciones  ",
             style="Card.TLabelframe",
         )
         self.restricciones_frame.pack(fill="x", pady=5, ipady=4)
 
+    def _ajustar_formulario(self, evento):
+        ancho_contenido = self.formulario_interior.winfo_reqwidth()
+        self.formulario_canvas.itemconfigure(
+            self.formulario_id, width=max(evento.width, ancho_contenido)
+        )
+
     def _crear_salida(self):
         marco = ttk.LabelFrame(
-            self.ventana, text="  Resultado y tablas  ",
+            self.contenido, text="  Resultados y gráfica  ",
             style="Card.TLabelframe",
         )
-        marco.pack(fill="both", expand=True, padx=24, pady=(8, 18))
+        self.contenido.add(marco, weight=2)
         marco.rowconfigure(0, weight=1)
         marco.columnconfigure(0, weight=1)
         self.tablas = ttk.Notebook(marco)
         self.tablas.grid(row=0, column=0, sticky="nsew")
         self.resumen = ttk.Frame(self.tablas, style="App.TFrame")
         self.tablas.add(self.resumen, text="Resumen")
+        ttk.Label(
+            self.resumen,
+            text="La solución aparecerá aquí al resolver el modelo.",
+            padding=24,
+        ).pack(anchor="nw")
+        self.grafica_tab = ttk.Frame(self.tablas, style="App.TFrame")
+        self.tablas.add(self.grafica_tab, text="Gráfica")
+        self.grafica_canvas = tk.Canvas(
+            self.grafica_tab,
+            bg="#ffffff",
+            highlightthickness=1,
+            highlightbackground="#d5ded7",
+        )
+        self.grafica_canvas.pack(fill="both", expand=True, padx=8, pady=8)
+        self.grafica_problema = None
+        self.grafica_resultado = None
+        self.grafica_canvas.bind("<Configure>", self._actualizar_grafica)
 
     def _limpiar_frame(self, frame):
         for widget in frame.winfo_children():
@@ -285,6 +386,11 @@ class InterfazSimplex:
             self.signos_restricciones.append(signo)
             self.rhs_restricciones.append(rhs)
 
+        self.formulario.update_idletasks()
+        self.formulario_canvas.configure(
+            scrollregion=self.formulario_canvas.bbox("all")
+        )
+
     def _leer_numero(self, entrada, descripcion):
         try:
             return float(entrada.get().strip())
@@ -338,7 +444,7 @@ class InterfazSimplex:
 
     def _mostrar_resultado_grafico(self, resultado, problema, capturas):
         for pestaña in self.tablas.tabs():
-            if pestaña != str(self.resumen):
+            if pestaña not in (str(self.resumen), str(self.grafica_tab)):
                 self.tablas.forget(pestaña)
         for widget in self.resumen.winfo_children():
             widget.destroy()
@@ -362,6 +468,10 @@ class InterfazSimplex:
             self.resumen, text=texto, justify="left",
             font=("Segoe UI Semibold", 14), padding=24,
         ).pack(anchor="nw")
+        self.grafica_problema = None
+        self.grafica_resultado = None
+        self._actualizar_grafica()
+        self.tablas.select(self.resumen)
 
         for titulo, tabla in capturas:
             self._agregar_tabla(titulo, tabla)
@@ -391,9 +501,16 @@ class InterfazSimplex:
             ],
         )
         barra = ttk.Scrollbar(marco, orient="vertical", command=vista.yview)
-        vista.configure(yscrollcommand=barra.set)
+        barra_horizontal = ttk.Scrollbar(
+            marco, orient="horizontal", command=vista.xview
+        )
+        vista.configure(
+            yscrollcommand=barra.set,
+            xscrollcommand=barra_horizontal.set,
+        )
         vista.grid(row=0, column=0, sticky="nsew")
         barra.grid(row=0, column=1, sticky="ns")
+        barra_horizontal.grid(row=1, column=0, sticky="ew")
         marco.rowconfigure(0, weight=1)
         marco.columnconfigure(0, weight=1)
 
@@ -431,34 +548,33 @@ class InterfazSimplex:
             messagebox.showerror("Error inesperado", str(error))
             return
 
-        grafica = tk.Toplevel(self.ventana)
-        grafica.title("Gráfica del problema")
-        grafica.geometry("820x650")
-        grafica.configure(bg="#f4f7fb")
-        ttk.Label(
-            grafica,
-            text="Región factible",
-            style="Title.TLabel",
-        ).pack(anchor="w", padx=22, pady=(18, 0))
-        ttk.Label(
-            grafica,
-            text="Restricciones, región factible y solución óptima",
-            style="Subtitle.TLabel",
-        ).pack(anchor="w", padx=22, pady=(0, 10))
-        lienzo = tk.Canvas(
-            grafica,
-            bg="#ffffff",
-            highlightthickness=1,
-            highlightbackground="#dbe3ef",
+        self.grafica_problema = problema
+        self.grafica_resultado = resultado
+        self.tablas.select(self.grafica_tab)
+        self.grafica_canvas.update_idletasks()
+        self._dibujar_grafica(
+            self.grafica_canvas, self.grafica_problema, self.grafica_resultado
         )
-        lienzo.pack(fill="both", expand=True, padx=22, pady=(0, 18))
-        lienzo.bind(
-            "<Configure>",
-            lambda _evento: self._dibujar_grafica(
-                lienzo, problema, resultado
-            ),
+
+    def _actualizar_grafica(self, evento=None):
+        if self.grafica_problema is not None:
+            self._dibujar_grafica(
+                self.grafica_canvas,
+                self.grafica_problema,
+                self.grafica_resultado,
+            )
+            return
+
+        ancho = evento.width if evento else self.grafica_canvas.winfo_width()
+        alto = evento.height if evento else self.grafica_canvas.winfo_height()
+        self.grafica_canvas.delete("all")
+        self.grafica_canvas.create_text(
+            ancho / 2,
+            alto / 2,
+            text="La gráfica aparecerá aquí al pulsar Graficar.",
+            fill="#63736b",
+            font=("Segoe UI", 11),
         )
-        self._dibujar_grafica(lienzo, problema, resultado)
 
     def _punto_factible(self, problema, x, y):
         tolerancia = 1e-7
