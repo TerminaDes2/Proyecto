@@ -348,9 +348,17 @@ Antes de usarlo, el programa comprueba que:
 
 - se utilizaron variables no negativas;
 - todas las restricciones son `<=`.
+- todos los lados derechos (`RHS`) son no negativos.
 
 Si alguna condición no se cumple, se lanza un `ValueError` y se recomienda
 utilizar Dos fases o Gran M.
+
+Con las condiciones admitidas por el Simplex directo, el punto `X = 0` es
+factible inicialmente. Por eso este método puede detectar correctamente un
+problema `no_acotado`, pero los problemas con restricciones incompatibles,
+igualdades, restricciones `>=` o `RHS` negativo deben resolverse con Dos fases
+o Gran M. El programa ya rechaza explícitamente un `RHS` negativo para evitar
+clasificarlo incorrectamente como `no_acotado`.
 
 La tabla canónica se muestra antes del primer pivote con el encabezado
 `TABLA INICIAL`. Después de cada pivote se imprime la tabla actual con el

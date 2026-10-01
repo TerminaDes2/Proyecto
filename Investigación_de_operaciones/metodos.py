@@ -32,6 +32,12 @@ def resolver_simplex(problema, observador=None):
             "Use Dos fases o Gran M para >= o =."
         )
 
+    if any(restriccion.rhs < 0 for restriccion in problema.restricciones):
+        raise ValueError(
+            "El método Simplex requiere resultados RHS no negativos. "
+            "Use Dos fases o Gran M para restricciones con RHS negativo."
+        )
+
     tabla = construir_tabla_canonica(problema)
     if observador:
         observador(tabla, "Tabla inicial", 0)
