@@ -47,6 +47,7 @@ responsabilidad concreta:
 | `metodos.py` | Ejecuta Simplex, Dos fases o Gran M. |
 | `simplex.py` | Contiene una implementación clásica de Simplex. |
 | `salida.py` | Imprime tablas, iteraciones y resultados. |
+| `interfaz.py` | Contiene la interfaz gráfica realizada con Tkinter. |
 
 Esta separación es útil porque permite cambiar la forma de leer los datos sin
 tener que modificar el algoritmo matemático, o cambiar la forma de mostrar los
@@ -742,3 +743,56 @@ La idea central es que el programa no trabaja directamente con las ecuaciones
 que escribe el usuario. Primero las transforma a una tabla organizada para que
 el algoritmo pueda realizar operaciones elementales de filas y mejorar
 gradualmente la solución.
+
+---
+
+## 15. Interfaz gráfica
+
+El archivo `interfaz.py` implementa una interfaz gráfica con **Tkinter**, que
+forma parte de la biblioteca estándar de Python. No se instalaron librerías
+externas.
+
+Para iniciar la interfaz se ejecuta:
+
+```text
+python main.py
+```
+
+La ventana permite seleccionar:
+
+- maximización o minimización;
+- variables no negativas;
+- método Simplex, Dos fases o Gran M;
+- cantidad de variables;
+- cantidad de restricciones.
+
+Después de pulsar `Actualizar formulario`, se muestran los campos para los
+coeficientes de la función objetivo y de cada restricción. El botón `Resolver`
+construye un objeto `Problema` y utiliza las mismas funciones matemáticas que
+el modo de consola.
+
+El resultado se presenta en un área de texto con desplazamiento vertical y
+horizontal. Esto permite consultar la tabla inicial, las tablas de cada
+iteración, la traza y el resultado final. En Gran M se conserva la
+representación simbólica de la penalización, por ejemplo `12M` o `-M + 5.00`.
+
+El botón `Graficar` abre una ventana con la representación visual del problema.
+La gráfica está disponible para problemas de exactamente dos variables y con
+variables no negativas. En ella se muestran:
+
+- los ejes `X1` y `X2`;
+- las rectas de las restricciones;
+- los puntos de intersección factibles;
+- la región factible sombreada;
+- el punto óptimo, cuando el método encuentra una solución óptima.
+
+La gráfica se construye con `tkinter.Canvas`, por lo que no requiere
+`matplotlib` ni ninguna otra librería externa. Para problemas con más de dos
+variables, la interfaz informa que no es posible representarlos directamente
+en este plano.
+
+El modo de consola anterior se conserva y puede iniciarse explícitamente con:
+
+```text
+python main.py --consola
+```

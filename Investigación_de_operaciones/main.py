@@ -1,10 +1,8 @@
+import sys
+
 from entrada import leer_problema
 from metodos import resolver_problema
-from salida import (
-    mostrar_tabla,
-    mostrar_traza,
-    mostrar_resultado
-)
+from salida import mostrar_tabla, mostrar_traza, mostrar_resultado
 
 
 def main():
@@ -47,4 +45,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--consola" in sys.argv:
+        main()
+    else:
+        from interfaz import iniciar_interfaz
+
+        iniciar_interfaz()
