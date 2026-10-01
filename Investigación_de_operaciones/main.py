@@ -20,7 +20,8 @@ def main():
 
         print("\n===== TABLA FINAL =====")
         mostrar_tabla(resultado["tabla"])
-        mostrar_traza(resultado["traza"])
+        if resultado.get("traza") is not None:
+            mostrar_traza(resultado["traza"])
 
         # -----------------------------------------
         # Mostrar resultado

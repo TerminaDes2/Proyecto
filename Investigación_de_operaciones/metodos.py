@@ -1,5 +1,6 @@
 from canonico import construir_tabla_canonica
 from simplex import resolver as resolver_simplex_clasico
+from salida import mostrar_tabla
 
 
 def resolver_problema(problema):
@@ -25,9 +26,20 @@ def resolver_simplex(problema):
         )
 
     tabla = construir_tabla_canonica(problema)
-    resultado = resolver_simplex_clasico(tabla)
-    resultado["traza"] = []
+    print("\n===== TABLA INICIAL =====")
+    mostrar_tabla(tabla)
+
+    resultado = resolver_simplex_clasico(
+        tabla,
+        mostrar_iteracion
+    )
+    resultado["traza"] = None
     return resultado
+
+
+def mostrar_iteracion(tabla, iteracion):
+    print(f"\n===== ITERACIÓN {iteracion} =====")
+    mostrar_tabla(tabla)
 
 
 def resolver_dos_fases(tabla):
@@ -49,7 +61,7 @@ def resolver_gran_m(tabla):
     preparar_objetivo(tabla, costos)
     estado = simplex(tabla, traza, 1)
     if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > 0
-           for fila, nombre in enumerate(tabla.base)):
+            for fila, nombre in enumerate(tabla.base)):
         estado = "sin_solucion"
     return resultado(tabla, traza, "optimo" if estado == "optimo" else estado)
 

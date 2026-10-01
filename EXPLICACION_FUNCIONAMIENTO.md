@@ -76,8 +76,13 @@ La función `main()` realiza estos pasos:
 2. Comprueba si el usuario canceló la selección inicial.
 3. Envía el problema a `resolver_problema()`.
 4. Muestra la tabla final.
-5. Muestra la traza de las iteraciones.
+5. Muestra la traza cuando el método seleccionado la genera.
 6. Muestra la solución final.
+
+Cuando se utiliza el método Simplex directo, las tablas se imprimen durante la
+resolución: primero se muestra la tabla inicial y después la tabla resultante
+de cada iteración. Por eso este método no necesita una traza resumida adicional
+al terminar.
 
 El bloque `try` permite controlar errores:
 
@@ -346,6 +351,24 @@ Antes de usarlo, el programa comprueba que:
 Si alguna condición no se cumple, se lanza un `ValueError` y se recomienda
 utilizar Dos fases o Gran M.
 
+La tabla canónica se muestra antes del primer pivote con el encabezado
+`TABLA INICIAL`. Después de cada pivote se imprime la tabla actual con el
+encabezado correspondiente a la iteración:
+
+```text
+===== TABLA INICIAL =====
+...
+===== ITERACIÓN 1 =====
+...
+===== ITERACIÓN 2 =====
+...
+```
+
+El callback `mostrar_iteracion()` conecta la implementación de
+`simplex.py` con `mostrar_tabla()` de `salida.py`. Así, el algoritmo conserva
+la responsabilidad de resolver y la salida conserva la responsabilidad de
+formatear las tablas.
+
 ### 7.2 Método de Dos fases
 
 Este método trabaja en dos etapas:
@@ -386,7 +409,10 @@ precisión numérica en casos complicados.
 
 ## 8. Cómo se realiza un pivoteo
 
-La función `simplex()` repite el proceso hasta terminar.
+Las implementaciones de Simplex repiten el proceso hasta terminar. La función
+`resolver()` de `simplex.py` se utiliza para el Simplex directo, mientras que
+la función `simplex()` de `metodos.py` se utiliza en las fases de Dos fases y
+Gran M.
 
 ### Paso 1: elegir la columna pivote
 
@@ -513,7 +539,15 @@ La tabla se imprime con dos decimales para facilitar la lectura.
 `mostrar_traza()` imprime cada pivoteo. Esta información sirve para comprobar
 qué variable entró, qué variable salió y qué razones se compararon.
 
-Si no hubo pivoteos, se muestra:
+Dos fases y Gran M almacenan esta información en `traza` y la muestran al
+terminar la resolución. Cada registro incluye la fase, la columna pivote, las
+divisiones de la razón mínima, la fila seleccionada y el elemento pivote.
+
+En Simplex directo, las tablas de cada iteración ya se imprimen durante el
+proceso mediante `mostrar_iteracion()`. Por ello `main.py` no intenta mostrar
+una traza resumida para este método.
+
+Cuando un método que usa `mostrar_traza()` no realiza pivoteos, se muestra:
 
 ```text
 No se necesitaron pivoteos.
@@ -576,29 +610,33 @@ Al terminar, la tabla contiene los valores óptimos en la columna `RHS`.
 
 ---
 
-## 13. Limitación actual de la opción Simplex
+## 13. Visualización del proceso Simplex
 
-En `metodos.py`, la función `resolver_simplex()` llama a:
+La opción **Simplex** muestra el estado del tableau en tres momentos:
+
+1. **Tabla inicial:** se imprime justo después de construir la tabla canónica,
+   antes de realizar cualquier pivoteo.
+2. **Tablas de iteración:** después de cada pivote se imprime la tabla
+   actualizada. El número de iteración comienza en `1`.
+3. **Tabla final:** `main.py` vuelve a mostrar la tabla cuando termina el
+   algoritmo, antes de presentar el resultado.
+
+La tabla inicial permite verificar la base de holguras y la fila objetivo antes
+de comenzar. Las tablas de iteración permiten seguir los cambios producidos
+por la normalización de la fila pivote, la eliminación de los demás elementos
+de la columna pivote y la actualización de la base.
+
+La función `resolver()` recibe `mostrar_iteracion` como callback. En
+`metodos.py`, el callback se conecta con:
 
 ```python
-resultado = resolver_simplex_clasico(tabla)
+def mostrar_iteracion(tabla, iteracion):
+    print(f"\n===== ITERACIÓN {iteracion} =====")
+    mostrar_tabla(tabla)
 ```
 
-Sin embargo, en `simplex.py` la función está declarada como:
-
-```python
-def resolver(tabla, mostrar_iteracion):
-```
-
-Por lo tanto, la opción **Simplex** actualmente puede producir un error por
-falta del argumento `mostrar_iteracion`. Las opciones **Dos fases** y **Gran M**
-utilizan la implementación de `simplex()` que está dentro de `metodos.py` y no
-dependen de ese argumento.
-
-La corrección recomendable sería enviar una función de mostrar iteraciones, o
-modificar la implementación clásica para que ese parámetro sea opcional. Esta
-observación se incluye porque forma parte del comportamiento real del programa
-y es importante conocerla al ejecutarlo.
+De esta forma, el algoritmo no depende de detalles específicos del formato de
+salida y cada iteración se muestra inmediatamente después de completarse.
 
 ---
 
