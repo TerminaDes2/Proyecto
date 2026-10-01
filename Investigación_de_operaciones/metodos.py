@@ -6,20 +6,20 @@ from salida import mostrar_tabla
 TOLERANCIA = 1e-9
 
 
-def resolver_problema(problema):
+def resolver_problema(problema, observador=None):
     if problema.metodo == "simplex":
-        return resolver_simplex(problema)
+        return resolver_simplex(problema, observador)
     tabla = construir_tabla_canonica(problema)
     print("\n===== TABLA INICIAL =====")
     if problema.metodo == "gran_m":
         tabla.mostrar_m = True
         mostrar_tabla(tabla, mostrar_m=True)
-        return resolver_gran_m(tabla)
+        return resolver_gran_m(tabla, observador)
     mostrar_tabla(tabla)
-    return resolver_dos_fases(tabla)
+    return resolver_dos_fases(tabla, observador)
 
 
-def resolver_simplex(problema):
+def resolver_simplex(problema, observador=None):
     if not problema.no_negativas:
         raise ValueError(
             "El método Simplex requiere variables de no negatividad. "
@@ -33,13 +33,17 @@ def resolver_simplex(problema):
         )
 
     tabla = construir_tabla_canonica(problema)
+    if observador:
+        observador(tabla, "Tabla inicial", 0)
     print("\n===== TABLA INICIAL =====")
     mostrar_tabla(tabla)
 
-    resultado = resolver_simplex_clasico(
-        tabla,
-        mostrar_iteracion
-    )
+    callback = mostrar_iteracion
+    if observador:
+        callback = lambda tabla_actual, iteracion: observador(
+            tabla_actual, f"Iteración {iteracion}", iteracion
+        )
+    resultado = resolver_simplex_clasico(tabla, callback)
     resultado["traza"] = None
     return resultado
 
@@ -49,24 +53,27 @@ def mostrar_iteracion(tabla, iteracion):
     mostrar_tabla(tabla)
 
 
-def resolver_dos_fases(tabla):
+def resolver_dos_fases(tabla, observador=None):
     traza = []
     preparar_objetivo(tabla, {nombre: -1.0 for nombre in tabla.artificiales})
-    estado = simplex(tabla, traza, 1, mostrar_tablas=True)
+    estado = simplex(tabla, traza, 1, mostrar_tablas=not observador,
+                    observador=observador)
     if estado == "no_acotado" or tabla.matriz[-1][-1] < -TOLERANCIA:
         return resultado(tabla, traza, "sin_solucion")
     quitar_artificiales(tabla)
     preparar_objetivo(tabla, tabla.costos_objetivo)
-    estado = simplex(tabla, traza, 2, mostrar_tablas=True)
+    estado = simplex(tabla, traza, 2, mostrar_tablas=not observador,
+                    observador=observador)
     return resultado(tabla, traza, "optimo" if estado == "optimo" else estado)
 
 
-def resolver_gran_m(tabla):
+def resolver_gran_m(tabla, observador=None):
     traza = []
     costos = {nombre: -1_000_000.0 for nombre in tabla.artificiales}
     costos.update(tabla.costos_objetivo)
     preparar_objetivo(tabla, costos)
-    estado = simplex(tabla, traza, 1, mostrar_tablas=True)
+    estado = simplex(tabla, traza, 1, mostrar_tablas=not observador,
+                    observador=observador)
     if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > TOLERANCIA
             for fila, nombre in enumerate(tabla.base)):
         estado = "sin_solucion"
@@ -84,8 +91,10 @@ def preparar_objetivo(tabla, costos):
     tabla.matriz[-1] = fila
 
 
-def simplex(tabla, traza, fase, mostrar_tablas=False):
+def simplex(tabla, traza, fase, mostrar_tablas=False, observador=None):
     iteracion = 0
+    if observador:
+        observador(tabla, f"Fase {fase} - Tabla inicial", 0)
     if mostrar_tablas:
         mostrar_tabla_fase(tabla, fase, inicial=True)
 
@@ -108,6 +117,8 @@ def simplex(tabla, traza, fase, mostrar_tablas=False):
         iteracion += 1
         if mostrar_tablas:
             mostrar_tabla_fase(tabla, fase, iteracion)
+        if observador:
+            observador(tabla, f"Fase {fase} - Iteración {iteracion}", iteracion)
 
 
 def mostrar_tabla_fase(tabla, fase, iteracion=0, inicial=False):

@@ -1,6 +1,7 @@
 import io
 import math
 import tkinter as tk
+from copy import deepcopy
 from contextlib import redirect_stdout
 from tkinter import messagebox, ttk
 
@@ -212,34 +213,12 @@ class InterfazSimplex:
             style="Card.TLabelframe",
         )
         marco.pack(fill="both", expand=True, padx=24, pady=(8, 18))
-        self.salida = tk.Text(
-            marco,
-            wrap="none",
-            font=("Cascadia Mono", 10),
-            bg="#172033",
-            fg="#e5edf8",
-            insertbackground="#ffffff",
-            selectbackground="#2563eb",
-            relief="flat",
-            padx=14,
-            pady=12,
-            state="disabled",
-        )
-        barra_vertical = ttk.Scrollbar(
-            marco, orient="vertical", command=self.salida.yview
-        )
-        barra_horizontal = ttk.Scrollbar(
-            marco, orient="horizontal", command=self.salida.xview
-        )
-        self.salida.configure(
-            yscrollcommand=barra_vertical.set,
-            xscrollcommand=barra_horizontal.set,
-        )
-        self.salida.grid(row=0, column=0, sticky="nsew")
-        barra_vertical.grid(row=0, column=1, sticky="ns")
-        barra_horizontal.grid(row=1, column=0, sticky="ew")
         marco.rowconfigure(0, weight=1)
         marco.columnconfigure(0, weight=1)
+        self.tablas = ttk.Notebook(marco)
+        self.tablas.grid(row=0, column=0, sticky="nsew")
+        self.resumen = ttk.Frame(self.tablas, style="App.TFrame")
+        self.tablas.add(self.resumen, text="Resumen")
 
     def _limpiar_frame(self, frame):
         for widget in frame.winfo_children():
@@ -341,18 +320,13 @@ class InterfazSimplex:
     def _resolver(self):
         try:
             problema = self._crear_problema()
-            captura = io.StringIO()
-            with redirect_stdout(captura):
-                resultado = resolver_problema(problema)
-                print("\n===== TABLA FINAL =====")
-                mostrar_tabla(
-                    resultado["tabla"],
-                    mostrar_m=getattr(resultado["tabla"], "mostrar_m", False),
-                )
-                if resultado.get("traza") is not None:
-                    mostrar_traza(resultado["traza"])
-                mostrar_resultado(resultado, len(problema.objetivo), problema)
-            texto = captura.getvalue()
+            capturas = []
+
+            def observar(tabla, titulo, _iteracion):
+                capturas.append((titulo, deepcopy(tabla)))
+
+            with redirect_stdout(io.StringIO()):
+                resultado = resolver_problema(problema, observar)
         except (ValueError, ZeroDivisionError) as error:
             messagebox.showerror("Datos inválidos", str(error))
             return
@@ -360,10 +334,68 @@ class InterfazSimplex:
             messagebox.showerror("Error inesperado", str(error))
             return
 
-        self.salida.configure(state="normal")
-        self.salida.delete("1.0", tk.END)
-        self.salida.insert("1.0", texto)
-        self.salida.configure(state="disabled")
+        self._mostrar_resultado_grafico(resultado, problema, capturas)
+
+    def _mostrar_resultado_grafico(self, resultado, problema, capturas):
+        for pestaña in self.tablas.tabs():
+            if pestaña != str(self.resumen):
+                self.tablas.forget(pestaña)
+        for widget in self.resumen.winfo_children():
+            widget.destroy()
+
+        estado = resultado["estado"]
+        if estado == "optimo":
+            valores, z = obtener_solucion(resultado["tabla"], len(problema.objetivo))
+            texto = "Solución óptima\n\n"
+            texto += "\n".join(
+                f"X{indice + 1} = {valor:.4f}"
+                for indice, valor in enumerate(valores)
+            )
+            texto += f"\n\nZ = {z:.4f}\nIteraciones: {resultado['iteraciones']}"
+        elif estado == "sin_solucion":
+            texto = "El problema no tiene solución factible."
+        elif estado == "no_acotado":
+            texto = "El problema es no acotado."
+        else:
+            texto = f"No se pudo obtener una solución: {estado}."
+        ttk.Label(
+            self.resumen, text=texto, justify="left",
+            font=("Segoe UI Semibold", 14), padding=24,
+        ).pack(anchor="nw")
+
+        for titulo, tabla in capturas:
+            self._agregar_tabla(titulo, tabla)
+
+    def _agregar_tabla(self, titulo, tabla):
+        marco = ttk.Frame(self.tablas)
+        self.tablas.add(marco, text=titulo[:18])
+        columnas = ["Base"] + tabla.columnas
+        vista = ttk.Treeview(marco, columns=columnas, show="headings")
+        for columna in columnas:
+            vista.heading(columna, text=columna)
+            vista.column(columna, width=92, anchor="center")
+        mostrar_m = getattr(tabla, "mostrar_m", False)
+        from salida import formatear_valor
+        for indice, fila in enumerate(tabla.matriz[:-1]):
+            vista.insert(
+                "", "end",
+                values=[tabla.base[indice]] + [
+                    formatear_valor(valor, mostrar_m) for valor in fila
+                ],
+            )
+        vista.insert(
+            "", "end",
+            values=["Z"] + [
+                formatear_valor(valor, mostrar_m)
+                for valor in tabla.matriz[-1]
+            ],
+        )
+        barra = ttk.Scrollbar(marco, orient="vertical", command=vista.yview)
+        vista.configure(yscrollcommand=barra.set)
+        vista.grid(row=0, column=0, sticky="nsew")
+        barra.grid(row=0, column=1, sticky="ns")
+        marco.rowconfigure(0, weight=1)
+        marco.columnconfigure(0, weight=1)
 
     def _graficar(self):
         try:

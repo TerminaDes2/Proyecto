@@ -776,6 +776,13 @@ horizontal. Esto permite consultar la tabla inicial, las tablas de cada
 iteración, la traza y el resultado final. En Gran M se conserva la
 representación simbólica de la penalización, por ejemplo `12M` o `-M + 5.00`.
 
+En la interfaz gráfica, las tablas no se presentan como texto de terminal.
+Cada una se muestra como una tabla independiente dentro de una pestaña, con
+encabezados para la base, las variables y `RHS`. La pestaña `Resumen` muestra
+el estado, las variables de la solución y el valor de `Z`; las demás pestañas
+contienen la tabla inicial y los tableaux de cada iteración o fase. Las tablas
+incluyen barras de desplazamiento cuando tienen muchas columnas o filas.
+
 El botón `Graficar` abre una ventana con la representación visual del problema.
 La gráfica está disponible para problemas de exactamente dos variables y con
 variables no negativas. En ella se muestran:
