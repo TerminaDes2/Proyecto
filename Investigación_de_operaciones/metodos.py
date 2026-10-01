@@ -1,10 +1,5 @@
-from math import isclose
-
 from canonico import construir_tabla_canonica
 from simplex import resolver as resolver_simplex_clasico
-
-
-EPSILON = 1e-9
 
 
 def resolver_problema(problema):
@@ -39,7 +34,7 @@ def resolver_dos_fases(tabla):
     traza = []
     preparar_objetivo(tabla, {nombre: -1.0 for nombre in tabla.artificiales})
     estado = simplex(tabla, traza, 1)
-    if estado == "no_acotado" or tabla.matriz[-1][-1] < -EPSILON:
+    if estado == "no_acotado" or tabla.matriz[-1][-1] < 0:
         return resultado(tabla, traza, "sin_solucion")
     quitar_artificiales(tabla)
     preparar_objetivo(tabla, tabla.costos_objetivo)
@@ -53,7 +48,7 @@ def resolver_gran_m(tabla):
     costos.update(tabla.costos_objetivo)
     preparar_objetivo(tabla, costos)
     estado = simplex(tabla, traza, 1)
-    if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > EPSILON
+    if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > 0
            for fila, nombre in enumerate(tabla.base)):
         estado = "sin_solucion"
     return resultado(tabla, traza, "optimo" if estado == "optimo" else estado)
@@ -92,7 +87,7 @@ def simplex(tabla, traza, fase):
 def columna_pivote(tabla):
     valores = tabla.matriz[-1][:-1]
     minimo = min(valores, default=0)
-    return valores.index(minimo) if minimo < -EPSILON else -1
+    return valores.index(minimo) if minimo < 0 else -1
 
 
 def fila_pivote(tabla, columna):
@@ -101,7 +96,7 @@ def fila_pivote(tabla, columna):
     menor = float("inf")
     for fila in range(len(tabla.matriz) - 1):
         elemento = tabla.matriz[fila][columna]
-        if elemento > EPSILON:
+        if elemento > 0:
             razon = tabla.matriz[fila][-1] / elemento
             divisiones.append((tabla.base[fila], razon))
             if razon < menor:
@@ -122,7 +117,7 @@ def pivotear(tabla, fila_pivote, columna_pivote):
                         for valor, pivote_valor in zip(valores, matriz[fila_pivote])]
     for valores in matriz:
         for columna, valor in enumerate(valores):
-            if isclose(valor, 0, abs_tol=EPSILON):
+            if valor == 0:
                 valores[columna] = 0.0
 
 
@@ -134,7 +129,7 @@ def quitar_artificiales(tabla):
             fila.pop(indice)
     tabla.transformaciones_nombres = [
         [(nombre, signo) for nombre, signo in transformacion
-         if nombre not in tabla.artificiales]
+            if nombre not in tabla.artificiales]
         for transformacion in tabla.transformaciones_nombres
     ]
     tabla.artificiales = []
