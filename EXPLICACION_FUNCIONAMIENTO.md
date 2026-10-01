@@ -382,11 +382,29 @@ las restricciones.
 Si una variable artificial permanece con un valor positivo o el proceso no
 puede continuar, el problema se considera sin solución factible.
 
+La comprobación del valor final de la fase 1 utiliza una tolerancia de
+`1e-9`. Esto evita confundir errores mínimos de redondeo, como
+`-4.44e-16`, con una inconsistencia real. Un valor negativo menor que
+`-1e-9` sí indica que quedó artificial positiva y el problema se marca como
+`sin_solucion`.
+
 #### Fase 2: optimizar la función original
 
 Después de encontrar una base factible, se eliminan las columnas de las
 variables artificiales. Luego se restaura la función objetivo original y se
 continúa pivotando para encontrar el máximo o mínimo solicitado.
+
+Durante la ejecución se muestran las tablas de ambas fases. Cada fase imprime
+su tableau inicial y una tabla después de cada pivote:
+
+```text
+===== FASE 1 - TABLA INICIAL =====
+===== FASE 1 - ITERACIÓN 1 =====
+...
+===== FASE 2 - TABLA INICIAL =====
+===== FASE 2 - ITERACIÓN 1 =====
+...
+```
 
 ### 7.3 Método de Gran M
 
@@ -400,6 +418,23 @@ muy grande:
 La penalización hace que el algoritmo intente evitar esas variables. Si al
 terminar alguna artificial sigue siendo básica con un valor positivo, el
 problema se marca como `sin_solucion`.
+
+La comprobación de artificiales positivas también utiliza la tolerancia
+`1e-9`, de modo que pequeños residuos numéricos no alteren el estado final.
+
+El tableau inicial con la función objetivo penalizada y cada tableau posterior
+a un pivote se muestran con el mismo formato que en el método Simplex:
+
+```text
+===== FASE 1 - TABLA INICIAL =====
+===== FASE 1 - ITERACIÓN 1 =====
+...
+```
+
+En las tablas de Gran M, los coeficientes que dependen de la penalización se
+presentan simbólicamente. Por ejemplo, un valor numérico equivalente a
+`12 000 000` se muestra como `12M`, y `-1 000 000 + 5` se muestra como
+`-M + 5`. Los cálculos internos continúan utilizando `M = 1 000 000`.
 
 La ventaja es que se realiza una sola secuencia principal de pivoteos. La
 desventaja es que el uso de un número muy grande puede provocar problemas de
@@ -532,7 +567,23 @@ solución.
 - valores de cada restricción;
 - fila `Z`.
 
-La tabla se imprime con dos decimales para facilitar la lectura.
+En Simplex y Dos fases los valores numéricos se imprimen con dos decimales
+para facilitar la lectura. En Gran M, las tablas de la fase penalizada se
+imprimen con `mostrar_m=True`, por lo que los valores relacionados con la
+penalización se muestran usando la letra `M`.
+
+La función `formatear_valor()` convierte la representación numérica interna a
+una representación simbólica para la salida. Algunos ejemplos son:
+
+```text
+12 000 000       -> 12M
+-1 000 000       -> -M
+-500 000         -> -0.5M
+-999 995         -> -M + 5.00
+```
+
+Esta conversión solamente afecta la presentación. El algoritmo continúa
+operando internamente con `M = 1 000 000` y con valores de tipo `float`.
 
 ### Detalle de iteraciones
 
@@ -543,9 +594,12 @@ Dos fases y Gran M almacenan esta información en `traza` y la muestran al
 terminar la resolución. Cada registro incluye la fase, la columna pivote, las
 divisiones de la razón mínima, la fila seleccionada y el elemento pivote.
 
-En Simplex directo, las tablas de cada iteración ya se imprimen durante el
-proceso mediante `mostrar_iteracion()`. Por ello `main.py` no intenta mostrar
-una traza resumida para este método.
+En Simplex directo, las tablas de cada iteración se imprimen durante el
+proceso mediante `mostrar_iteracion()`. Dos fases y Gran M utilizan
+`mostrar_tabla_fase()` para imprimir la tabla inicial y cada resultado de
+pivote, incluyendo el número de fase. Por ello las tablas permiten seguir el
+proceso completo en los tres métodos. En Gran M, `mostrar_tabla_fase()` activa
+la representación simbólica de `M` para todas las tablas de la fase penalizada.
 
 Cuando un método que usa `mostrar_traza()` no realiza pivoteos, se muestra:
 

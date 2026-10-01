@@ -1,7 +1,10 @@
-def mostrar_tabla(tabla):
+VALOR_M = 1_000_000.0
+
+
+def mostrar_tabla(tabla, mostrar_m=False):
 
     print("\n" + "=" * 60)
-    print("TABLA SIMPLEX")
+    print("TABLA")
     print("=" * 60)
     print(f"{'Base':>8}", end="")
     for columna in tabla.columnas:
@@ -11,13 +14,42 @@ def mostrar_tabla(tabla):
     for indice, fila in enumerate(tabla.matriz[:-1]):
         print(f"{tabla.base[indice]:>8}", end="")
         for valor in fila:
-            print(f"{valor:10.2f}", end="")
+            texto = formatear_valor(valor, mostrar_m)
+            print(f"{texto:>10}", end="")
         print()
 
     print(f"{'Z':>8}", end="")
     for valor in tabla.matriz[-1]:
-        print(f"{valor:10.2f}", end="")
+        texto = formatear_valor(valor, mostrar_m)
+        print(f"{texto:>10}", end="")
     print()
+
+
+def formatear_valor(valor, mostrar_m):
+    if not mostrar_m:
+        return f"{valor:.2f}"
+
+    coeficiente_m = round(valor / VALOR_M, 6)
+    coeficiente_entero = round(coeficiente_m)
+    if abs(coeficiente_m - coeficiente_entero) < 1e-4:
+        coeficiente_m = coeficiente_entero
+    constante = valor - coeficiente_m * VALOR_M
+    if abs(coeficiente_m) < 1e-9:
+        return f"{constante:.2f}"
+    if abs(constante) < 1e-7:
+        return formatear_coeficiente_m(coeficiente_m)
+
+    parte_m = formatear_coeficiente_m(abs(coeficiente_m))
+    signo = "+" if constante > 0 else "-"
+    return f"{'-' if coeficiente_m < 0 else ''}{parte_m} {signo} {abs(constante):.2f}"
+
+
+def formatear_coeficiente_m(coeficiente):
+    if abs(coeficiente - 1) < 1e-9:
+        return "M"
+    if abs(coeficiente + 1) < 1e-9:
+        return "-M"
+    return f"{coeficiente:g}M"
 
 
 def mostrar_traza(traza):

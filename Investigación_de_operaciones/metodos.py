@@ -3,12 +3,19 @@ from simplex import resolver as resolver_simplex_clasico
 from salida import mostrar_tabla
 
 
+TOLERANCIA = 1e-9
+
+
 def resolver_problema(problema):
     if problema.metodo == "simplex":
         return resolver_simplex(problema)
     tabla = construir_tabla_canonica(problema)
+    print("\n===== TABLA INICIAL =====")
     if problema.metodo == "gran_m":
+        tabla.mostrar_m = True
+        mostrar_tabla(tabla, mostrar_m=True)
         return resolver_gran_m(tabla)
+    mostrar_tabla(tabla)
     return resolver_dos_fases(tabla)
 
 
@@ -45,12 +52,12 @@ def mostrar_iteracion(tabla, iteracion):
 def resolver_dos_fases(tabla):
     traza = []
     preparar_objetivo(tabla, {nombre: -1.0 for nombre in tabla.artificiales})
-    estado = simplex(tabla, traza, 1)
-    if estado == "no_acotado" or tabla.matriz[-1][-1] < 0:
+    estado = simplex(tabla, traza, 1, mostrar_tablas=True)
+    if estado == "no_acotado" or tabla.matriz[-1][-1] < -TOLERANCIA:
         return resultado(tabla, traza, "sin_solucion")
     quitar_artificiales(tabla)
     preparar_objetivo(tabla, tabla.costos_objetivo)
-    estado = simplex(tabla, traza, 2)
+    estado = simplex(tabla, traza, 2, mostrar_tablas=True)
     return resultado(tabla, traza, "optimo" if estado == "optimo" else estado)
 
 
@@ -59,8 +66,8 @@ def resolver_gran_m(tabla):
     costos = {nombre: -1_000_000.0 for nombre in tabla.artificiales}
     costos.update(tabla.costos_objetivo)
     preparar_objetivo(tabla, costos)
-    estado = simplex(tabla, traza, 1)
-    if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > 0
+    estado = simplex(tabla, traza, 1, mostrar_tablas=True)
+    if any(nombre in tabla.artificiales and tabla.matriz[fila][-1] > TOLERANCIA
             for fila, nombre in enumerate(tabla.base)):
         estado = "sin_solucion"
     return resultado(tabla, traza, "optimo" if estado == "optimo" else estado)
@@ -77,7 +84,11 @@ def preparar_objetivo(tabla, costos):
     tabla.matriz[-1] = fila
 
 
-def simplex(tabla, traza, fase):
+def simplex(tabla, traza, fase, mostrar_tablas=False):
+    iteracion = 0
+    if mostrar_tablas:
+        mostrar_tabla_fase(tabla, fase, inicial=True)
+
     while True:
         columna = columna_pivote(tabla)
         if columna == -1:
@@ -94,6 +105,17 @@ def simplex(tabla, traza, fase):
             return "no_acotado"
         pivotear(tabla, fila, columna)
         tabla.base[fila] = tabla.columnas[columna]
+        iteracion += 1
+        if mostrar_tablas:
+            mostrar_tabla_fase(tabla, fase, iteracion)
+
+
+def mostrar_tabla_fase(tabla, fase, iteracion=0, inicial=False):
+    if inicial:
+        print(f"\n===== FASE {fase} - TABLA INICIAL =====")
+    else:
+        print(f"\n===== FASE {fase} - ITERACIÓN {iteracion} =====")
+    mostrar_tabla(tabla, mostrar_m=getattr(tabla, "mostrar_m", False))
 
 
 def columna_pivote(tabla):
